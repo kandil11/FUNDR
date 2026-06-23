@@ -37,6 +37,26 @@ def train_model():
     df['loan_to_income_ratio'] = df['loan_amnt'] / (df['annual_inc'] + 1.0)
     df['payment_to_income'] = df['installment'] / ((df['annual_inc'] / 12.0) + 1.0)
 
+    # Engineered features
+    df['dti_x_int_rate'] = df['dti'] * df['int_rate']
+    df['fico_x_int_rate'] = df['fico_range_high'] * df['int_rate']
+    # Extract term months numeric
+    df['term_months'] = df['term'].str.extract(r'(\d+)').astype(int)
+    df['risk_term_pressure'] = df['int_rate'] * (df['term_months'] == 60).astype(int)
+
+    df['loan_to_income'] = df['loan_amnt'] / (df['annual_inc'] + 1e-6)
+    df['debt_pressure'] = (df['loan_amnt'] * df['int_rate']) / (df['annual_inc'] + 1e-6)
+
+    df['activity_density'] = df['acc_open_past_24mths'] / (df['open_acc'] + 1)
+    df['overextension'] = df['revol_util'] * df['acc_open_past_24mths']
+
+    df['fico_gap'] = df['fico_range_high'] - df['fico_range_low']
+
+    df['log_loan_amnt'] = np.log1p(df['loan_amnt'])
+    df['log_annual_income'] = np.log1p(df['annual_inc'])
+
+    df['dti_squared'] = df['dti'] ** 2
+
     df = df[df['loan_status'].isin(['Fully Paid', 'Charged Off', 'Default'])]
 
     target_map = {'Fully Paid': 0, 'Charged Off': 1, 'Default': 1}
@@ -47,7 +67,11 @@ def train_model():
         'fico_range_high', 'int_rate', 'dti', 'loan_amnt', 'annual_inc', 'revol_util',
         'inq_last_6mths', 'delinq_2yrs', 'pub_rec', 'installment', 'acc_open_past_24mths',
         'mort_acc', 'tot_cur_bal', 'bc_util', 'percent_bc_gt_75', 'pub_rec_bankruptcies',
-        'num_tl_op_past_12m', 'tot_hi_cred_lim', 'loan_to_income_ratio', 'payment_to_income'
+        'num_tl_op_past_12m', 'tot_hi_cred_lim', 'loan_to_income_ratio', 'payment_to_income',
+        # Engineered features
+        'dti_x_int_rate', 'fico_x_int_rate', 'risk_term_pressure',
+        'loan_to_income', 'debt_pressure', 'activity_density', 'overextension',
+        'fico_gap', 'log_loan_amnt', 'log_annual_income', 'dti_squared'
     ]
 
     cat_features = ['term', 'home_ownership', 'purpose', 'verification_status']
