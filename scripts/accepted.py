@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "data", "raw"))
 PROCESSED_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "data", "processed"))
 
-filename = "accepted_2007_to_2018Q4.csv"
+filename = "accepted_2007_to_2018Q4.csv.gz"
 input_file = os.path.join(RAW_DIR, filename)
 print(f"Loading file: {input_file}")
 
