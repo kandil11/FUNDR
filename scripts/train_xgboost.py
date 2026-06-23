@@ -23,11 +23,13 @@ def train_model():
 
     ensure_data_exists()
 
+    # Columns to load from the processed dataset
     cols = [
         'loan_status', 'fico_range_high', 'int_rate', 'dti', 'loan_amnt', 'annual_inc', 'revol_util',
         'term', 'home_ownership', 'purpose', 'verification_status', 'inq_last_6mths',
         'delinq_2yrs', 'pub_rec', 'installment', 'acc_open_past_24mths', 'mort_acc',
-        'tot_cur_bal', 'bc_util', 'percent_bc_gt_75', 'pub_rec_bankruptcies', 'num_tl_op_past_12m', 'tot_hi_cred_lim'
+        'tot_cur_bal', 'bc_util', 'percent_bc_gt_75', 'pub_rec_bankruptcies',
+        'num_tl_op_past_12m', 'tot_hi_cred_lim'
     ]
 
     df = pd.read_csv(input_file, usecols=cols, low_memory=False)
@@ -40,6 +42,7 @@ def train_model():
     target_map = {'Fully Paid': 0, 'Charged Off': 1, 'Default': 1}
     df['is_default'] = df['loan_status'].map(target_map)
 
+    # Define features lists
     num_features = [
         'fico_range_high', 'int_rate', 'dti', 'loan_amnt', 'annual_inc', 'revol_util',
         'inq_last_6mths', 'delinq_2yrs', 'pub_rec', 'installment', 'acc_open_past_24mths',
@@ -52,10 +55,17 @@ def train_model():
     X = df[num_features + cat_features]
     y = df['is_default']
 
-    X_train, X_test, y_train, y_test = train_test_split(
+    # Split data into train, validation, and test sets
+    X_train_full, X_test, y_train_full, y_test = train_test_split(
         X, y, test_size=0.2, stratify=y, random_state=42
     )
-
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_train_full, y_train_full, test_size=0.2, stratify=y_train_full, random_state=42
+    )
+    # Compute class distribution on training data
+    pos = sum(y_train)
+    neg = len(y_train) - pos
+    scale_pos_weight = neg / pos if pos != 0 else 1.0
     numeric_transformer = Pipeline([
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
@@ -74,13 +84,14 @@ def train_model():
     xgb_pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('classifier', XGBClassifier(
-            scale_pos_weight=2.0,
+            scale_pos_weight=scale_pos_weight,
             random_state=42,
             n_jobs=-1,
             eval_metric='auc'
         ))
     ])
 
+    # Hyper‑parameter search (same as before)
     param_grid = {
         'classifier__n_estimators': [100, 200],
         'classifier__max_depth': [3, 5, 7],
@@ -102,7 +113,28 @@ def train_model():
 
     search.fit(X_train, y_train)
     best_pipeline = search.best_estimator_
-
+    
+    # Threshold optimisation on validation set (max F1)
+    val_prob = best_pipeline.predict_proba(X_val)[:, 1]
+    best_thr = 0.5
+    best_f1 = 0.0
+    for t in np.arange(0.1, 0.9, 0.02):
+        pred = (val_prob >= t).astype(int)
+        f1 = f1_score(y_val, pred)
+        if f1 > best_f1:
+            best_f1 = f1
+            best_thr = t
+    # Save best threshold
+    os.makedirs(results_dir, exist_ok=True)
+    with open(os.path.join(results_dir, "best_threshold.json"), "w") as f:
+        json.dump({"threshold": best_thr, "f1": best_f1}, f, indent=2)
+    
+    # -----------------------------------------------------------------
+    # Save model and test data for later evaluation
+    joblib.dump(best_pipeline, os.path.join(models_dir, "xgb_pipeline.pkl"))
+    joblib.dump((X_test, y_test), os.path.join(models_dir, "test_data.pkl"))
+    
+    # Also retain LogisticRegression for interpretability if desired
     lr_pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('classifier', LogisticRegression(
@@ -111,13 +143,8 @@ def train_model():
             random_state=42
         ))
     ])
-
     lr_pipeline.fit(X_train, y_train)
-
-    # ===================== ADDED: SAVE MODELS =====================
-    joblib.dump(best_pipeline, os.path.join(models_dir, "xgb_pipeline.pkl"))
     joblib.dump(lr_pipeline, os.path.join(models_dir, "lr_pipeline.pkl"))
-    joblib.dump((X_test, y_test), os.path.join(models_dir, "test_data.pkl"))
 
     print("Models saved successfully.")
 
