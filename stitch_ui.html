@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en" style="scroll-behavior: smooth;"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FUNDR Analytics Engine - Overview</title>
+<link rel="icon" type="image/png" href="/static/logo.png">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="/static/dashboard_data.js"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+        body {
+            background-color: #020617;
+            color: #dae2fd;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar for horizontal model metrics */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#171f33",
+                        "secondary-container": "#00a572",
+                        "surface-container-lowest": "#060e20",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-highest": "#2d3449",
+                        "primary-container": "#b76dff",
+                        "secondary": "#4edea3",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "outline-variant": "#4d4354",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#6ffbbe",
+                        "primary-fixed-dim": "#ddb7ff",
+                        "inverse-primary": "#842bd2",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-secondary-fixed-variant": "#005236",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#cfc2d6",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-container": "#00285d",
+                        "on-primary-fixed-variant": "#6900b3",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-container": "#00311f",
+                        "on-primary": "#490080",
+                        "on-surface": "#dae2fd",
+                        "tertiary": "#adc6ff",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#f0dbff",
+                        "primary": "#ddb7ff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-container-high": "#222a3d",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003824",
+                        "tertiary-fixed": "#d8e2ff",
+                        "inverse-surface": "#dae2fd",
+                        "on-tertiary": "#002e6a",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#988d9f",
+                        "on-primary-fixed": "#2c0051",
+                        "surface-tint": "#ddb7ff",
+                        "surface": "#0b1326",
+                        "tertiary-container": "#4d8eff",
+                        "background": "#0b1326",
+                        "on-primary-container": "#400071",
+                        "surface-bright": "#31394d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "unit": "4px",
+                        "margin-desktop": "40px",
+                        "container-max": "1440px",
+                        "stack-md": "16px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Geist"],
+                        "label-sm": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/40 dark:bg-surface-dim/40 backdrop-blur-xl border-b border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img src="/static/logo.png" alt="FUNDR Logo" class="w-full h-full object-cover">
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tighter font-bold text-on-surface">FUNDR</h1>
+<span class="ml-2 px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-[10px] tracking-widest border border-secondary/30 uppercase">PROD</span>
+</div>
+<div class="hidden md:flex items-center gap-stack-lg">
+<a href="#overview" class="font-headline-md text-headline-md-mobile text-primary dark:text-primary-fixed-dim font-bold hover:opacity-80 transition-opacity">Overview</a>
+<a href="#drift" class="font-headline-md text-headline-md-mobile text-on-surface-variant/70 dark:text-on-surface-variant/70 hover:opacity-80 transition-opacity">Drift</a>
+<a href="#simulate" class="font-headline-md text-headline-md-mobile text-on-surface-variant/70 dark:text-on-surface-variant/70 hover:opacity-80 transition-opacity">Simulate</a>
+<a href="#investments" class="font-headline-md text-headline-md-mobile text-on-surface-variant/70 dark:text-on-surface-variant/70 hover:opacity-80 transition-opacity">Investments</a>
+</div>
+</header>
+<main class="pt-20 pb-28 px-margin-mobile max-w-screen-xl mx-auto space-y-stack-lg">
+<!-- Welcome/Header Section -->
+<section class="space-y-unit">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">FUNDR Analytics Engine</h2>
+<p class="font-body-md text-body-md text-on-surface-variant/60">Live Institutional Portfolio Monitoring & Risk Assessment</p>
+</section>
+<!-- Analytics Stats Section: Vertical Stack for Mobile -->
+<section id="overview" class="grid grid-cols-1 md:grid-cols-4 gap-gutter scroll-mt-32">
+<div class="glass-card p-stack-md rounded-xl space-y-unit">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Records Analyzed</p>
+<h3 id="kpi_total_records" class="font-display-lg text-[32px] text-primary">1.2M</h3>
+<div class="flex items-center text-secondary text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12.4%
+                </div>
+</div>
+<div class="glass-card p-stack-md rounded-xl space-y-unit">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Loan Amount</p>
+<h3 id="kpi_total_loan_amount" class="font-display-lg text-[32px] text-on-surface">$450M</h3>
+<div class="flex items-center text-secondary text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +5.2%
+                </div>
+</div>
+<div class="glass-card p-stack-md rounded-xl space-y-unit">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Avg Interest Rate</p>
+<h3 id="kpi_avg_int_rate" class="font-display-lg text-[32px] text-on-surface">5.4%</h3>
+<div class="flex items-center text-error text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_down</span> -0.1%
+                </div>
+</div>
+<div class="glass-card p-stack-md rounded-xl space-y-unit">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Top Entity</p>
+<h3 id="kpi_top_growing_entity" class="font-headline-lg text-headline-lg text-primary truncate">Tech Corp</h3>
+<div class="flex items-center text-secondary text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">verified</span> Growing
+                </div>
+</div>
+</section>
+<!-- Model Metrics Horizontal Scrolling -->
+<section class="space-y-stack-sm">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-[0.2em] px-1">Model Metrics</h4>
+<div class="flex overflow-x-auto gap-stack-md pb-stack-sm no-scrollbar">
+<div class="flex-none w-40 glass-card p-stack-md rounded-xl flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-secondary">Accuracy</span>
+<span id="metric_accuracy" class="font-headline-lg text-headline-lg text-on-surface">98.2%</span>
+</div>
+<div class="flex-none w-40 glass-card p-stack-md rounded-xl flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-tertiary">Precision</span>
+<span id="metric_precision" class="font-headline-lg text-headline-lg text-on-surface">97.5%</span>
+</div>
+<div class="flex-none w-40 glass-card p-stack-md rounded-xl flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-primary">Recall</span>
+<span id="metric_recall" class="font-headline-lg text-headline-lg text-on-surface">96.8%</span>
+</div>
+<div class="flex-none w-40 glass-card p-stack-md rounded-xl flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-white/60">F1 Score</span>
+<span id="metric_f1_score" class="font-headline-lg text-headline-lg text-on-surface">97.1%</span>
+</div>
+</div>
+</section>
+<!-- Charts & Confusion Matrix Bento Grid -->
+<section id="drift" class="grid grid-cols-1 md:grid-cols-12 gap-gutter scroll-mt-32">
+<!-- Line Chart: Data Drift -->
+<div class="md:col-span-8 glass-card p-stack-lg rounded-xl flex flex-col h-80">
+<div class="flex justify-between items-start mb-6">
+<h4 class="font-headline-md text-headline-md-mobile text-on-surface">ROC Curve</h4>
+<span class="material-symbols-outlined text-primary">show_chart</span>
+</div>
+<div class="flex-grow relative overflow-hidden flex items-end gap-2" id="roc_container">
+<!-- Graph drawn via JS -->
+</div>
+<div class="mt-4 flex justify-between font-label-sm text-label-sm text-on-surface-variant/40">
+<span>FPR 0.0</span><span>0.5</span><span>1.0</span>
+</div>
+</div>
+<!-- Confusion Matrix -->
+<div class="md:col-span-4 glass-card p-stack-lg rounded-xl flex flex-col">
+<h4 class="font-headline-md text-headline-md-mobile text-on-surface mb-6">Inference Matrix</h4>
+<div class="grid grid-cols-2 gap-stack-sm flex-grow">
+<div class="bg-secondary/20 rounded-lg p-stack-md border border-secondary/30 flex flex-col justify-between">
+<span class="font-label-sm text-[10px] text-secondary uppercase">True Pos</span>
+<span id="cm_tp" class="font-headline-md text-headline-md-mobile text-on-surface">842</span>
+</div>
+<div class="bg-error/10 rounded-lg p-stack-md border border-error/20 flex flex-col justify-between">
+<span class="font-label-sm text-[10px] text-error uppercase">False Pos</span>
+<span id="cm_fp" class="font-headline-md text-headline-md-mobile text-on-surface">24</span>
+</div>
+<div class="bg-tertiary/10 rounded-lg p-stack-md border border-tertiary/20 flex flex-col justify-between">
+<span class="font-label-sm text-[10px] text-tertiary uppercase">False Neg</span>
+<span id="cm_fn" class="font-headline-md text-headline-md-mobile text-on-surface">18</span>
+</div>
+<div class="bg-secondary/20 rounded-lg p-stack-md border border-secondary/30 flex flex-col justify-between">
+<span class="font-label-sm text-[10px] text-secondary uppercase">True Neg</span>
+<span id="cm_tn" class="font-headline-md text-headline-md-mobile text-on-surface">912</span>
+</div>
+</div>
+<p class="mt-4 text-center font-label-sm text-label-sm text-on-surface-variant/60">Confusion Matrix</p>
+</div>
+</section>
+<!-- Bar Chart: Regional Trends -->
+<section class="glass-card p-stack-lg rounded-xl">
+<h4 class="font-headline-md text-headline-md-mobile text-on-surface mb-8">Feature Importance</h4>
+<div class="flex items-end justify-around h-48 gap-4 px-4" id="feature_importance_container">
+<!-- Rendered via JS -->
+</div>
+</section>
+<!-- AI Risk Simulator Section -->
+<section id="simulate" class="space-y-stack-md pt-8 scroll-mt-32">
+<div class="flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">psychology_alt</span>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">AI Risk Simulator</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Input Form -->
+<div class="glass-card p-stack-lg rounded-xl space-y-stack-md">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant/80">Loan Amount ($)</label>
+<input id="loan_amnt" class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="500,000" type="number"/>
+</div>
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant/80">Term (Months)</label>
+<input id="term" class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="36" type="number"/>
+</div>
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant/80">Interest Rate (%)</label>
+<input id="int_rate" class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="4.5" type="number"/>
+</div>
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant/80">Annual Income ($)</label>
+<input id="annual_inc" class="w-full bg-surface-container-lowest border border-white/10 rounded-lg py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="120,000" type="number"/>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary-fixed font-bold rounded-xl active:scale-95 transition-transform duration-150 glow-purple flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+                        Simulate Risk
+                    </button>
+</div>
+<!-- Results Area -->
+<div class="glass-card p-stack-lg rounded-xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+<!-- Decorative Background Element -->
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
+<div class="relative z-10 space-y-stack-md">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Simulation Output</p>
+<div class="space-y-stack-sm w-full px-4">
+<p id="ai_decision" class="font-body-lg text-secondary italic leading-relaxed">Decision: PENDING</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant/60 uppercase tracking-widest">AI Investment Thesis</p>
+</div>
+<div class="h-px w-24 bg-white/10 mx-auto"></div>
+<div class="space-y-unit">
+<p id="xgb_risk" class="font-display-lg text-[40px] text-on-surface">--%</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant/60">XGBoost Default Probability</p>
+</div>
+<!-- SHAP Factors Block -->
+<div id="shap_factors_container" class="hidden w-full text-left mt-4 p-4 rounded-lg bg-surface-container-lowest border border-white/5 shadow-inner">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <p class="font-label-sm text-error mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">trending_up</span> Increases Risk</p>
+            <ul id="shap_increases" class="font-body-sm text-on-surface-variant/80 space-y-1 list-disc list-inside"></ul>
+        </div>
+        <div>
+            <p class="font-label-sm text-secondary mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">trending_down</span> Decreases Risk</p>
+            <ul id="shap_decreases" class="font-body-sm text-on-surface-variant/80 space-y-1 list-disc list-inside"></ul>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Investments Section -->
+<section id="investments" class="glass-card p-stack-lg rounded-xl scroll-mt-32">
+<div class="flex items-center gap-stack-sm mb-6">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Top Investment Opportunities</h2>
+</div>
+
+<!-- Portfolio Strategy Highlights -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-surface-container-lowest/40 border border-white/5 rounded-lg p-4 text-center">
+        <p class="font-label-sm text-on-surface-variant/70 uppercase tracking-wider mb-1">Top State</p>
+        <p id="strat_state" class="font-display-sm text-primary">--</p>
+    </div>
+    <div class="bg-surface-container-lowest/40 border border-white/5 rounded-lg p-4 text-center">
+        <p class="font-label-sm text-on-surface-variant/70 uppercase tracking-wider mb-1">Top Purpose</p>
+        <p id="strat_purpose" class="font-display-sm text-secondary truncate">--</p>
+    </div>
+    <div class="bg-surface-container-lowest/40 border border-white/5 rounded-lg p-4 text-center">
+        <p class="font-label-sm text-on-surface-variant/70 uppercase tracking-wider mb-1">Avg Income</p>
+        <p id="strat_income" class="font-display-sm text-tertiary">--</p>
+    </div>
+    <div class="bg-surface-container-lowest/40 border border-white/5 rounded-lg p-4 text-center">
+        <p class="font-label-sm text-on-surface-variant/70 uppercase tracking-wider mb-1">Avg DTI</p>
+        <p id="strat_dti" class="font-display-sm text-on-surface">--</p>
+    </div>
+</div>
+
+<!-- AI Investment Thesis -->
+<div class="mb-8 p-6 bg-primary/10 border border-primary/20 rounded-xl relative overflow-hidden">
+    <div class="absolute -right-4 -top-4 opacity-10 pointer-events-none">
+        <span class="material-symbols-outlined text-[120px]">smart_toy</span>
+    </div>
+    <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-primary text-xl">auto_awesome</span>
+        <h3 class="font-bold text-primary font-headline-sm-mobile">AI Investment Thesis</h3>
+    </div>
+    <p id="ai_thesis_text" class="text-on-surface-variant font-body-lg leading-relaxed italic">
+        Generating thesis...
+    </p>
+</div>
+
+<div class="w-full h-80 mb-8 p-4 bg-surface-container-lowest/30 rounded-lg border border-white/5">
+    <canvas id="investmentsChart"></canvas>
+</div>
+
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/10 text-on-surface-variant font-label-sm">
+<th class="p-4">Grade</th>
+<th class="p-4">Loan Amount</th>
+<th class="p-4">Int Rate</th>
+<th class="p-4">Default Prob</th>
+<th class="p-4">Exp. Return</th>
+<th class="p-4">Action</th>
+</tr>
+</thead>
+<tbody id="investments_table_body" class="text-on-surface font-body-sm">
+<!-- Rendered via JS -->
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container/40 dark:bg-surface-container/40 backdrop-blur-xl border-t border-white/5 rounded-t-xl shadow-2xl md:hidden">
+<a class="flex flex-col items-center justify-center bg-primary-container/20 text-primary dark:text-primary-container rounded-full px-4 py-1 Active: scale-90 transition-all duration-200" href="#overview">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-on-surface-variant/60 hover:text-primary transition-colors Active: scale-90 transition-all duration-200" href="#drift">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm">Drift</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-on-surface-variant/60 hover:text-primary transition-colors Active: scale-90 transition-all duration-200" href="#simulate">
+<span class="material-symbols-outlined" data-icon="psychology_alt">psychology_alt</span>
+<span class="font-label-sm text-label-sm">Simulate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-on-surface-variant/60 hover:text-primary transition-colors Active: scale-90 transition-all duration-200" href="#investments">
+<span class="material-symbols-outlined" data-icon="account_balance">account_balance</span>
+<span class="font-label-sm text-label-sm">Invest</span>
+</a>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.parentElement.classList.add('scale-[1.02]');
+                });
+                input.addEventListener('blur', () => {
+                    input.parentElement.parentElement.classList.remove('scale-[1.02]');
+                });
+            });
+
+            // Real Fetch Click
+            const simBtn = document.querySelector('button.bg-primary');
+            simBtn.addEventListener('click', async () => {
+                const loan_amnt = parseFloat(document.getElementById('loan_amnt').value || 500000);
+                const term = document.getElementById('term').value || '36';
+                const int_rate = parseFloat(document.getElementById('int_rate').value || 4.5);
+                const annual_inc = parseFloat(document.getElementById('annual_inc').value || 120000);
+
+                simBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+                document.getElementById('ai_decision').innerText = "Generating Thesis...";
+                document.getElementById('ai_decision').className = "font-body-lg text-secondary italic leading-relaxed opacity-50";
+                document.getElementById('xgb_risk').innerText = "--%";
+                document.getElementById('shap_factors_container').classList.add('hidden');
+                
+                try {
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            loan_amnt: loan_amnt,
+                            term: term.includes('months') ? term : term + ' months',
+                            int_rate: int_rate,
+                            annual_inc: annual_inc
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const riskPercent = (data.xgboost_risk * 100).toFixed(1) + '%';
+                        document.getElementById('xgb_risk').innerText = riskPercent;
+                        
+                        document.getElementById('ai_decision').innerText = data.ai_auditor_decision;
+                        document.getElementById('ai_decision').className = data.xgboost_risk >= 0.20 
+                            ? "font-body-lg text-error italic leading-relaxed" 
+                            : "font-body-lg text-primary italic leading-relaxed";
+                            
+                        // Render SHAP factors
+                        if (data.shap_factors) {
+                            document.getElementById('shap_factors_container').classList.remove('hidden');
+                            
+                            const increasesHtml = data.shap_factors.increases_risk.map(f => 
+                                `<li>${f.feature} <span class="text-[10px] opacity-50 ml-1">+${f.impact.toFixed(2)}</span></li>`
+                            ).join('');
+                            document.getElementById('shap_increases').innerHTML = increasesHtml || '<li class="opacity-50">None</li>';
+                            
+                            const decreasesHtml = data.shap_factors.decreases_risk.map(f => 
+                                `<li>${f.feature} <span class="text-[10px] opacity-50 ml-1">${f.impact.toFixed(2)}</span></li>`
+                            ).join('');
+                            document.getElementById('shap_decreases').innerHTML = decreasesHtml || '<li class="opacity-50">None</li>';
+                        }
+                    } else {
+                        document.getElementById('ai_decision').innerText = 'API Error';
+                    }
+                } catch (e) {
+                    document.getElementById('ai_decision').innerText = 'Network Error';
+                } finally {
+                    simBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">bolt</span> Simulate Risk';
+                }
+            });
+            
+            // Render Dashboard Data
+            if (window.DASHBOARD_DATA) {
+                const formatNumber = (num) => {
+                    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                    return num;
+                };
+                const formatCurrency = (num) => '$' + formatNumber(num);
+                
+                document.getElementById('kpi_total_records').innerText = formatNumber(window.DASHBOARD_DATA.kpis.total_records);
+                document.getElementById('kpi_total_loan_amount').innerText = formatCurrency(window.DASHBOARD_DATA.kpis.total_loan_amount);
+                document.getElementById('kpi_avg_int_rate').innerText = window.DASHBOARD_DATA.kpis.avg_int_rate.toFixed(1) + '%';
+                document.getElementById('kpi_top_growing_entity').innerText = window.DASHBOARD_DATA.kpis.top_growing_entity;
+                
+                document.getElementById('metric_accuracy').innerText = window.DASHBOARD_DATA.xgboost.metrics.accuracy.toFixed(1) + '%';
+                document.getElementById('metric_precision').innerText = window.DASHBOARD_DATA.xgboost.metrics.precision.toFixed(1) + '%';
+                document.getElementById('metric_recall').innerText = window.DASHBOARD_DATA.xgboost.metrics.recall.toFixed(1) + '%';
+                document.getElementById('metric_f1_score').innerText = window.DASHBOARD_DATA.xgboost.metrics.f1_score.toFixed(1) + '%';
+                
+                const cm = window.DASHBOARD_DATA.xgboost.confusion_matrix;
+                document.getElementById('cm_tn').innerText = cm[0][0].toLocaleString();
+                document.getElementById('cm_fp').innerText = cm[0][1].toLocaleString();
+                document.getElementById('cm_fn').innerText = cm[1][0].toLocaleString();
+                document.getElementById('cm_tp').innerText = cm[1][1].toLocaleString();
+                
+                // Draw ROC Curve
+                const fpr = window.DASHBOARD_DATA.xgboost.roc_curve.fpr;
+                const tpr = window.DASHBOARD_DATA.xgboost.roc_curve.tpr;
+                let pathD = "";
+                for (let i = 0; i < fpr.length; i++) {
+                    const x = fpr[i] * 400;
+                    const y = 100 - (tpr[i] * 100);
+                    if (i === 0) pathD += `M${x},${y} `;
+                    else pathD += `L${x},${y} `;
+                }
+                document.getElementById('roc_container').innerHTML = `
+                <svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+                    <defs>
+                        <lineargradient id="gradient-drift" x1="0%" x2="100%" y1="0%" y2="0%">
+                            <stop offset="0%" stop-color="#ddb7ff" stop-opacity="0.2"></stop>
+                            <stop offset="50%" stop-color="#b76dff"></stop>
+                            <stop offset="100%" stop-color="#ddb7ff" stop-opacity="0.2"></stop>
+                        </lineargradient>
+                    </defs>
+                    <path d="${pathD}" fill="none" stroke="url(#gradient-drift)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+                </svg>
+                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+                    <div class="border-t border-white/10 w-full"></div>
+                    <div class="border-t border-white/10 w-full"></div>
+                    <div class="border-t border-white/10 w-full"></div>
+                </div>
+                `;
+                
+                // Draw Feature Importance
+                const features = window.DASHBOARD_DATA.xgboost.feature_importance.slice(0, 5); // top 5
+                const maxImp = Math.max(...features.map(f => f.importance));
+                let fiHTML = "";
+                const colors = ["bg-primary/40", "bg-secondary/40", "bg-tertiary/40", "bg-primary/20", "bg-secondary/20"];
+                const hoverColors = ["hover:bg-primary/60", "hover:bg-secondary/60", "hover:bg-tertiary/60", "hover:bg-primary/40", "hover:bg-secondary/40"];
+                
+                features.forEach((f, i) => {
+                    const heightPct = (f.importance / maxImp) * 100;
+                    const color = colors[i % colors.length];
+                    const hColor = hoverColors[i % hoverColors.length];
+                    fiHTML += `
+                    <div class="flex flex-col items-center justify-end gap-stack-sm w-full h-full group relative">
+                        <div class="w-full ${color} rounded-t-sm border-x border-t border-white/10 transition-all ${hColor}" style="height: ${heightPct}%"></div>
+                        <span class="font-label-sm text-[10px] text-on-surface-variant truncate w-full text-center">${f.feature}</span>
+                    </div>
+                    `;
+                });
+                document.getElementById('feature_importance_container').innerHTML = fiHTML;
+            }
+        });
+
+        // Load Investments
+        fetch('/static/top_investments.json')
+            .then(r => r.json())
+            .then(data => {
+                let rows = "";
+                data.forEach(loan => {
+                    const gradeColor = loan.grade === 'A' ? 'text-primary' : loan.grade === 'B' ? 'text-primary' : loan.grade === 'C' ? 'text-secondary' : 'text-tertiary';
+                    rows += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="p-4 font-bold ${gradeColor}">${loan.grade}</td>
+                        <td class="p-4">$${loan.loan_amnt.toLocaleString()}</td>
+                        <td class="p-4">${loan.int_rate.toFixed(2)}%</td>
+                        <td class="p-4">${(loan.Probability_of_Default * 100).toFixed(2)}%</td>
+                        <td class="p-4 text-primary font-bold">+${(loan.Risk_Adjusted_Return * 100).toFixed(2)}%</td>
+                        <td class="p-4"><button class="px-4 py-1 rounded bg-primary/20 text-primary hover:bg-primary/40 transition-colors text-sm font-bold">Invest</button></td>
+                    </tr>
+                    `;
+                });
+                document.getElementById('investments_table_body').innerHTML = rows;
+            })
+            .catch(err => console.error("Could not load investments:", err));
+
+        // Load Scatter Plot Data
+        fetch('/static/investment_graph_data.json')
+            .then(r => r.json())
+            .then(data => {
+                const ctx = document.getElementById('investmentsChart').getContext('2d');
+                
+                // Group data by grade
+                const grades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+                const colors = {
+                    'A': 'rgba(168, 85, 247, 0.8)', // Primary
+                    'B': 'rgba(216, 180, 254, 0.8)', // Primary Variant
+                    'C': 'rgba(56, 189, 248, 0.8)', // Secondary
+                    'D': 'rgba(125, 211, 252, 0.8)', // Secondary Variant
+                    'E': 'rgba(251, 146, 60, 0.8)', // Warning/Orange
+                    'F': 'rgba(248, 113, 113, 0.8)', // Error
+                    'G': 'rgba(220, 38, 38, 0.8)' // Dark Error
+                };
+
+                const datasets = grades.map(grade => {
+                    const gradeData = data.filter(d => d.grade === grade);
+                    return {
+                        label: `Grade ${grade}`,
+                        data: gradeData.map(d => ({
+                            x: d.Probability_of_Default * 100,
+                            y: d.Risk_Adjusted_Return * 100,
+                            _loanAmnt: d.loan_amnt,
+                            _intRate: d.int_rate
+                        })),
+                        backgroundColor: colors[grade] || 'rgba(255,255,255,0.5)',
+                        borderColor: 'transparent',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    };
+                }).filter(ds => ds.data.length > 0);
+
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        color: '#dae2fd',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: 'rgba(255,255,255,0.7)' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(ctx) {
+                                        const point = ctx.raw;
+                                        return `Risk: ${point.x.toFixed(2)}% | Return: +${point.y.toFixed(2)}% | Amt: $${point._loanAmnt}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Probability of Default (%)', color: 'rgba(255,255,255,0.5)' },
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: 'rgba(255,255,255,0.5)' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Expected Return (%)', color: 'rgba(255,255,255,0.5)' },
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: 'rgba(255,255,255,0.5)' }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error("Could not load scatter plot data:", err));
+
+        // Load Portfolio Strategy
+        fetch('/static/portfolio_strategy.json')
+            .then(r => r.json())
+            .then(data => {
+                const formatStratCurrency = (num) => '$' + (num / 1000).toFixed(0) + 'K';
+                document.getElementById('strat_state').innerText = data.top_state;
+                document.getElementById('strat_purpose').innerText = data.top_purpose;
+                document.getElementById('strat_income').innerText = formatStratCurrency(data.avg_income);
+                document.getElementById('strat_dti').innerText = data.avg_dti.toFixed(1) + '%';
+                if (data.ai_thesis && data.ai_thesis !== "AI Thesis generation failed.") {
+                    document.getElementById('ai_thesis_text').innerText = '"' + data.ai_thesis + '"';
+                } else {
+                    document.getElementById('ai_thesis_text').innerText = "AI Thesis currently unavailable.";
+                }
+            })
+            .catch(err => console.error("Could not load portfolio strategy:", err));
+    </script>
+</body></html>

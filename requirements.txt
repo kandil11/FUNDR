@@ -76,3 +76,7 @@ urllib3==2.7.0
 wcwidth==0.8.1
 webencodings==0.5.1
 xgboost==3.3.0
+pandas-datareader
+yfinance
+streamlit
+plotly
