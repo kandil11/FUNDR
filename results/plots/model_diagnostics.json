@@ -1,0 +1,27 @@
+{
+  "total_features": 285,
+  "features_explaining_80pct_importance": 96,
+  "num_zero_importance_features": 89,
+  "zero_importance_features": [
+    "fico_range_high",
+    "loan_amnt_6M_Trend_%",
+    "int_rate_6M_Trend_%",
+    "annual_inc_6M_Trend_%",
+    "fico_range_low_6M_Trend_%",
+    "fico_range_high_6M_Trend_%",
+    "revol_util_6M_Trend_%",
+    "revol_util_9M_Trend_%",
+    "fico_gap",
+    "log_loan_amnt",
+    "log_annual_income",
+    "home_ownership_NONE",
+    "purpose_educational",
+    "addr_state_IA",
+    "addr_state_IN",
+    "loan_amnt_1M_Trend_Label_Decreasing",
+    "loan_amnt_1M_Trend_Label_Increasing",
+    "loan_amnt_1M_Trend_Label_Unknown",
+    "loan_amnt_3M_Trend_Label_Decreasing",
+    "loan_amnt_3M_Trend_Label_Increasing"
+  ]
+}

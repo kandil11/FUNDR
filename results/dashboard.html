@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUNDR Analytics Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Premium CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Chart.js (via CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="app-sidebar mobile-open" id="sidebar">
+            <div class="app-sidebar-header">
+                <a href="#" class="logo">
+                    <div style="background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white;">F</div>
+                    FUNDR
+                </a>
+            </div>
+            <nav class="app-sidebar-nav">
+                <button class="app-sidebar-link active">Dashboard Overview</button>
+                <button class="app-sidebar-link">Performance Metrics</button>
+                <button class="app-sidebar-link">Risk Simulator</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main-content" style="margin-left: 280px;">
+            <header class="app-header">
+                <div>
+                    <h1 style="font-size: 1.5rem; font-weight: 800;">Analytics Engine</h1>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span class="stats-badge">Production Env</span>
+                </div>
+            </header>
+
+            <div class="app-main-body container">
+                
+                <div class="section-header">
+                    <h2>Portfolio KPIs</h2>
+                </div>
+
+                <div class="course-grid" style="margin-bottom: 3rem;">
+                    <!-- KPI 1 -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <div class="card-category">Total Records Analyzed</div>
+                        <div id="kpi-records" class="card-title" style="font-size: 2rem;">0</div>
+                        <div class="card-description" style="font-size: 0.8rem;">Cleaned & Imputed</div>
+                    </div>
+                    <!-- KPI 2 -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <div class="card-category">Total Loan Amount</div>
+                        <div id="kpi-amount" class="card-title" style="font-size: 2rem; color: var(--secondary)">$0.00</div>
+                        <div class="card-description" style="font-size: 0.8rem;">Aggregate Portfolio Volume</div>
+                    </div>
+                    <!-- KPI 3 -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <div class="card-category">Average Interest Rate</div>
+                        <div id="kpi-rate" class="card-title" style="font-size: 2rem; color: var(--accent-emerald)">0.00%</div>
+                        <div class="card-description" style="font-size: 0.8rem;">Portfolio Average Cost</div>
+                    </div>
+                    <!-- KPI 4 -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <div class="card-category">Top Growing Entity</div>
+                        <div id="kpi-growth" class="card-title" style="font-size: 1.5rem; color: var(--accent-purple)">N/A</div>
+                        <div class="card-description" style="font-size: 0.8rem;">By 6M Geometric Growth</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>Model Evaluation Metrics</h2>
+                </div>
+                
+                <div class="course-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 3rem;">
+                    <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                        <div class="card-category">Accuracy</div>
+                        <div id="eval-acc" class="card-title">--%</div>
+                    </div>
+                    <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                        <div class="card-category">Precision</div>
+                        <div id="eval-prec" class="card-title" style="color: var(--primary)">--%</div>
+                    </div>
+                    <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                        <div class="card-category">Recall</div>
+                        <div id="eval-rec" class="card-title" style="color: var(--accent-emerald)">--%</div>
+                    </div>
+                    <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                        <div class="card-category">F1 Score</div>
+                        <div id="eval-f1" class="card-title" style="color: var(--secondary)">--%</div>
+                    </div>
+                    <div class="glass-panel" style="padding: 1rem; text-align: center;">
+                        <div class="card-category">ROC-AUC</div>
+                        <div id="eval-auc" class="card-title" style="color: var(--accent-purple)">--</div>
+                    </div>
+                </div>
+
+                <div class="profile-layout-grid" style="margin-bottom: 3rem;">
+                    <!-- Trend Line Chart -->
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h2 class="card-title">Loan Issuance Volume Trends</h2>
+                        <div style="width: 100%; height: 400px; position: relative;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Rankings -->
+                    <div class="glass-panel" style="padding: 2rem; display: flex; flex-direction: column;">
+                        <h2 class="card-title">Performance Highlights</h2>
+                        <div class="search-form" style="margin-bottom: 1rem;">
+                            <input type="text" id="table-search" class="search-input" placeholder="Search entity...">
+                        </div>
+                        <div style="overflow-y: auto; max-height: 350px;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Entity</th>
+                                        <th style="text-align: right;">6M Growth</th>
+                                        <th style="text-align: right;">Consistency</th>
+                                        <th style="text-align: right;">Long Term</th>
+                                        <th>Stability</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rankings-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Deep Dive -->
+                <div class="section-header">
+                    <h2>Model Diagnostics</h2>
+                </div>
+                
+                <div class="course-grid" style="margin-bottom: 3rem; grid-template-columns: 1fr 1fr 1fr;">
+                    <!-- ROC Curve -->
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="card-title" style="margin-bottom:0">ROC Curve</h2>
+                            <div class="stats-badge" id="model-auc">0.00</div>
+                        </div>
+                        <div style="width: 100%; height: 250px; position: relative;">
+                            <canvas id="rocChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Importance -->
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h2 class="card-title">Global Feature Importance</h2>
+                        <div style="width: 100%; height: 250px; position: relative;">
+                            <canvas id="importanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Confusion Matrix -->
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="card-title" style="margin-bottom:0">Confusion Matrix</h2>
+                            <div class="stats-badge" id="model-acc" style="color: var(--accent-emerald)">0.00%</div>
+                        </div>
+                        <div id="cm-container" style="width: 100%; height: 250px;">
+                            <!-- Handled via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulator -->
+                <div class="section-header">
+                    <h2>Live Risk Simulator</h2>
+                </div>
+                
+                <div class="glass-panel" style="padding: 3rem;">
+                    <div class="profile-layout-grid">
+                        <div>
+                            <h2 class="card-title">Test Application</h2>
+                            <p class="card-description">Adjust the parameters below to see how the model evaluates a new loan application in real-time.</p>
+                            
+                            <div class="profile-form-row">
+                                <div class="form-group">
+                                    <label>FICO Score (High)</label>
+                                    <input type="number" id="input-fico" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;" min="300" max="850" value="710">
+                                </div>
+                                <div class="form-group">
+                                    <label>Interest Rate (%)</label>
+                                    <input type="number" id="input-rate" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;" min="5.0" max="35.0" value="12.5" step="0.1">
+                                </div>
+                            </div>
+                            
+                            <div class="profile-form-row">
+                                <div class="form-group">
+                                    <label>Debt-to-Income (%)</label>
+                                    <input type="number" id="input-dti" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;" min="0.0" max="100.0" value="18.5" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Loan Amount ($)</label>
+                                    <input type="number" id="input-amount" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;" min="1000" max="50000" value="15000">
+                                </div>
+                            </div>
+                            
+                            <div class="profile-form-row">
+                                <div class="form-group">
+                                    <label>Annual Income ($)</label>
+                                    <input type="number" id="input-income" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;" min="10000" max="250000" value="75000">
+                                </div>
+                            </div>
+                            
+                            <div class="profile-form-row">
+                                <div class="form-group">
+                                    <label>Term</label>
+                                    <select id="input-term" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;">
+                                        <option value="36_months">36 months</option>
+                                        <option value="60_months">60 months</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Home Ownership</label>
+                                    <select id="input-home" class="search-input" style="background: var(--bg-card) !important; border: 1px solid var(--border-glass) !important;">
+                                        <option value="MORTGAGE">Mortgage</option>
+                                        <option value="RENT">Rent</option>
+                                        <option value="OWN">Own</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 2rem;">
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem;">Default Risk Assessment</div>
+<div style="display:flex; justify-content:space-around; width:100%;"><div class="text-center"><span class="text-xs text-slate-400 uppercase tracking-wide">Risk of Bad Loan</span></div></div>
+                            <div id="risk-pct" style="font-size: 4.5rem; font-weight: 800; color: white; line-height: 1; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff, var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0.0%</div>
+                            
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                                <div id="risk-badge-glow" class="stats-badge">
+                                    <span id="risk-label">Unknown</span>
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; width: 100%; border: 1px solid var(--border-glass);">
+                                <div class="card-category">System Recommendation</div>
+                                <div id="risk-recommendation" style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">Processing...</div>
+                            </div>
+                            
+                            <div style="margin-top: 2rem; width: 100%;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                    <span>Input Variables</span>
+                                    <span>Values</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid var(--border-glass); padding: 0.25rem 0;"><span>FICO</span><span id="val-fico" style="color:white">--</span></div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid var(--border-glass); padding: 0.25rem 0;"><span>Rate</span><span id="val-rate" style="color:white">--</span></div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid var(--border-glass); padding: 0.25rem 0;"><span>DTI</span><span id="val-dti" style="color:white">--</span></div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid var(--border-glass); padding: 0.25rem 0;"><span>Amount</span><span id="val-amount" style="color:white">--</span></div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.25rem 0;"><span>Income</span><span id="val-income" style="color:white">--</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Data Injection -->
+    <script src="summary/dashboard_data.js"></script>
+    
+    <!-- Rest of the logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if data is available
+            if (!window.DASHBOARD_DATA) {
+                console.error("Dashboard data was not found. Please verify dashboard_data.js path.");
+                return;
+            }
+            
+            const data = window.DASHBOARD_DATA;
+            
+            // Format numbers
+            const formatNumber = (num) => new Intl.NumberFormat().format(num);
+            const formatCurrency = (num) => {
+                if (num >= 1e9) {
+                    return `$${(num / 1e9).toFixed(2)}B`;
+                } else if (num >= 1e6) {
+                    return `$${(num / 1e6).toFixed(2)}M`;
+                }
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+            };
+
+            // 1. Populate KPIs
+            document.getElementById('kpi-records').innerText = formatNumber(data.kpis.total_records);
+            document.getElementById('kpi-amount').innerText = formatCurrency(data.kpis.total_loan_amount);
+            document.getElementById('kpi-rate').innerText = `${data.kpis.avg_int_rate.toFixed(2)}%`;
+            document.getElementById('kpi-growth').innerText = data.kpis.top_growing_entity;
+
+            // 1.5 Populate Evaluation Metrics
+            if (data.xgboost && data.xgboost.metrics) {
+                document.getElementById('eval-acc').innerText = `${data.xgboost.metrics.accuracy.toFixed(1)}%`;
+                document.getElementById('eval-prec').innerText = `${data.xgboost.metrics.precision.toFixed(1)}%`;
+                document.getElementById('eval-rec').innerText = `${data.xgboost.metrics.recall.toFixed(1)}%`;
+                document.getElementById('eval-f1').innerText = `${data.xgboost.metrics.f1_score.toFixed(1)}%`;
+                document.getElementById('eval-auc').innerText = data.xgboost.metrics.auc.toFixed(3);
+                
+                // Update ML section headers
+                document.getElementById('model-acc').innerText = `${data.xgboost.metrics.accuracy.toFixed(1)}%`;
+                document.getElementById('model-auc').innerText = data.xgboost.metrics.auc.toFixed(3);
+            }
+
+            // 2. Render Chart.js Trend Chart
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            const colors = [
+                'rgba(99, 102, 241, 1)',   // indigo
+                'rgba(6, 182, 212, 1)',    // cyan
+                'rgba(168, 85, 247, 1)',   // purple
+                'rgba(16, 185, 129, 1)',   // emerald
+                'rgba(245, 158, 11, 1)',   // amber
+                'rgba(239, 68, 68, 1)',    // red
+                'rgba(236, 72, 153, 1)',   // pink
+                'rgba(59, 130, 246, 1)'    // blue
+            ];
+            
+            const datasets = data.top_entities.map((entity, i) => {
+                return {
+                    label: entity,
+                    data: data.trends[entity],
+                    borderColor: colors[i % colors.length],
+                    backgroundColor: colors[i % colors.length].replace(', 1)', ', 0.03)'),
+                    borderWidth: 2,
+                    pointRadius: 1,
+                    pointHoverRadius: 5,
+                    tension: 0.35,
+                    fill: true
+                };
+            });
+
+            const trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94A3B8',
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 11
+                                },
+                                padding: 16
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0F131E',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#D1D5DB',
+                            borderColor: '#1E2638',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 10
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#1E2638',
+                                drawTicks: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 10
+                                },
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Render Rankings Table
+            const renderTable = (filterText = '') => {
+                const tbody = document.getElementById('rankings-table-body');
+                tbody.innerHTML = '';
+                
+                const filteredRankings = data.rankings.filter(item => 
+                    item.entity.toLowerCase().includes(filterText.toLowerCase())
+                );
+                
+                filteredRankings.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-dark-card/50 transition-colors duration-150 border-b border-dark-border/20";
+                    
+                    // Determine Stability class and badge
+                    let badgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    let badgeLabel = "Highly Stable";
+                    
+                    if (item.consistency_score > 0.4) {
+                        badgeClass = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                        badgeLabel = "High Volatility";
+                    } else if (item.consistency_score > 0.2) {
+                        badgeClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                        badgeLabel = "Moderate Volatility";
+                    }
+                    
+                    // Trend style
+                    const trendClass = item.long_term_trend > 0 ? "text-emerald-400" : (item.long_term_trend < 0 ? "text-rose-400" : "text-slate-400");
+                    const trendPrefix = item.long_term_trend > 0 ? "+" : "";
+
+                    row.innerHTML = `
+                        <td class="py-4 px-4 font-semibold text-slate-400">${index + 1}</td>
+                        <td class="py-4 px-4 font-bold text-white">${item.entity}</td>
+                        <td class="py-4 px-4 text-right font-semibold text-indigo-400">${item.growth_score.toFixed(2)}%</td>
+                        <td class="py-4 px-4 text-right font-mono text-slate-400">${item.consistency_score.toFixed(4)}</td>
+                        <td class="py-4 px-4 text-right font-semibold ${trendClass}">${trendPrefix}${item.long_term_trend.toFixed(2)}%</td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${badgeClass}">
+                                ${badgeLabel}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            };
+            
+            // Search Input listener
+            document.getElementById('table-search').addEventListener('input', (e) => {
+                renderTable(e.target.value);
+            });
+            
+            // Initial table load
+            renderTable();
+
+            // --- ML Section Chart: Importance ---
+            const impCtx = document.getElementById('importanceChart').getContext('2d');
+            const impFeatures = data.xgboost.feature_importance.map(x => x.feature);
+            const impValues = data.xgboost.feature_importance.map(x => x.importance);
+            
+            const importanceChart = new Chart(impCtx, {
+                type: 'bar',
+                data: {
+                    labels: impFeatures,
+                    datasets: [{
+                        label: 'Feature Importance Weight',
+                        data: impValues,
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#1E2638' },
+                            ticks: { color: '#64748B' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#E2E8F0' }
+                        }
+                    }
+                }
+            });
+
+            // --- ML Section Chart: ROC ---
+            const rocCtx = document.getElementById('rocChart').getContext('2d');
+            const rocChart = new Chart(rocCtx, {
+                type: 'line',
+                data: {
+                    labels: data.xgboost.roc_curve.fpr,
+                    datasets: [{
+                        label: 'ROC Curve (AUC = 0.84)',
+                        data: data.xgboost.roc_curve.tpr,
+                        borderColor: 'rgba(6, 182, 212, 1)',
+                        backgroundColor: 'rgba(6, 182, 212, 0.05)',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        tension: 0.1,
+                        fill: true
+                    }, {
+                        label: 'Random Guess',
+                        data: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+                        borderColor: 'rgba(100, 116, 139, 0.5)',
+                        borderDash: [5, 5],
+                        borderWidth: 1,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94A3B8' } }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: 1.0,
+                            title: { display: true, text: 'False Positive Rate', color: '#64748B' },
+                            grid: { display: false },
+                            ticks: { color: '#64748B' }
+                        },
+                        y: {
+                            min: 0,
+                            max: 1.0,
+                            title: { display: true, text: 'True Positive Rate', color: '#64748B' },
+                            grid: { color: '#1E2638' },
+                            ticks: { color: '#64748B' }
+                        }
+                    }
+                }
+            });
+
+            // --- ML Section Chart: Confusion Matrix ---
+            if (data.xgboost && data.xgboost.confusion_matrix) {
+                const cm = data.xgboost.confusion_matrix;
+                const cmContainer = document.getElementById('cm-container');
+                cmContainer.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center text-xs text-slate-400">
+                        <div class="grid grid-cols-3 gap-1 w-full max-w-[280px]">
+                            <div></div>
+                            <div class="text-center pb-2">Predicted Good</div>
+                            <div class="text-center pb-2">Predicted Bad</div>
+                            
+                            <div class="flex items-center justify-end pr-3 text-right">Actual Good</div>
+                            <div class="bg-indigo-500/20 border border-indigo-500/40 text-indigo-200 p-3 rounded flex flex-col items-center justify-center h-16"><span class="font-bold text-lg">${formatNumber(cm[0][0])}</span></div>
+                            <div class="bg-rose-500/20 border border-rose-500/40 text-rose-200 p-3 rounded flex flex-col items-center justify-center h-16"><span class="font-bold text-lg">${formatNumber(cm[0][1])}</span></div>
+                            
+                            <div class="flex items-center justify-end pr-3 text-right">Actual Bad</div>
+                            <div class="bg-amber-500/20 border border-amber-500/40 text-amber-200 p-3 rounded flex flex-col items-center justify-center h-16"><span class="font-bold text-lg">${formatNumber(cm[1][0])}</span></div>
+                            <div class="bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 p-3 rounded flex flex-col items-center justify-center h-16"><span class="font-bold text-lg">${formatNumber(cm[1][1])}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- ML Interactive Simulator Logic ---
+            const updateSimulator = () => {
+                const fico = parseFloat(document.getElementById('input-fico').value);
+                const rate = parseFloat(document.getElementById('input-rate').value);
+                const dti = parseFloat(document.getElementById('input-dti').value);
+                const amount = parseFloat(document.getElementById('input-amount').value);
+                const income = parseFloat(document.getElementById('input-income').value);
+                const term = document.getElementById('input-term').value;
+                const home = document.getElementById('input-home').value;
+
+
+                // Update text displays
+                document.getElementById('val-fico').innerText = fico;
+                document.getElementById('val-rate').innerText = `${rate}%`;
+                document.getElementById('val-dti').innerText = `${dti}%`;
+                document.getElementById('val-amount').innerText = formatCurrency(amount);
+                document.getElementById('val-income').innerText = formatCurrency(income);
+
+                // Calculate log-odds using actual trained model coefficients from Logistic Regression
+                const w = data.xgboost.model_weights || {};
+                
+                const revol_util = 50.0; // Assume median revolving utilization for simulator
+                const inq_last_6mths = 0.0;
+                const delinq_2yrs = 0.0;
+                const pub_rec = 0.0;
+                const acc_open_past_24mths = 2.0;
+                const mort_acc = 1.0;
+                const tot_cur_bal = 100000.0;
+                const bc_util = 50.0;
+                const percent_bc_gt_75 = 30.0;
+                const pub_rec_bankruptcies = 0.0;
+                const num_tl_op_past_12m = 1.0;
+                const tot_hi_cred_lim = 120000.0;
+                
+                // Real-time feature engineering in JS
+                const loan_to_income_ratio = amount / (income + 1.0);
+                const installment_amt = (amount * (rate / 100)) / 12; // Extremely rough estimate for JS fallback if real installment not available
+                const payment_to_income = installment_amt / ((income / 12.0) + 1.0);
+                
+                let logOdds = 
+                    (w.fico_range_high || 0) * fico +
+                    (w.int_rate || 0) * rate +
+                    (w.dti || 0) * dti +
+                    (w.loan_amnt || 0) * amount +
+                    (w.annual_inc || 0) * income +
+                    (w.revol_util || 0) * revol_util +
+                    (w.inq_last_6mths || 0) * inq_last_6mths +
+                    (w.delinq_2yrs || 0) * delinq_2yrs +
+                    (w.pub_rec || 0) * pub_rec +
+                    (w.installment || 0) * installment_amt +
+                    (w.acc_open_past_24mths || 0) * acc_open_past_24mths +
+                    (w.mort_acc || 0) * mort_acc +
+                    (w.tot_cur_bal || 0) * tot_cur_bal +
+                    (w.bc_util || 0) * bc_util +
+                    (w.percent_bc_gt_75 || 0) * percent_bc_gt_75 +
+                    (w.pub_rec_bankruptcies || 0) * pub_rec_bankruptcies +
+                    (w.num_tl_op_past_12m || 0) * num_tl_op_past_12m +
+                    (w.tot_hi_cred_lim || 0) * tot_hi_cred_lim +
+                    (w.loan_to_income_ratio || 0) * loan_to_income_ratio +
+                    (w.payment_to_income || 0) * payment_to_income +
+                    (w.intercept || 0);
+
+                // Add categorical weights safely
+                if (term === '60_months' && w['term__60_months']) {
+                    logOdds += w['term__60_months'];
+                }
+                const home_key = 'home_ownership_' + home;
+                if (w[home_key]) {
+                    logOdds += w[home_key];
+                }
+
+
+                
+                // Sigmoid function
+                const probability = 1 / (1 + Math.exp(-logOdds));
+
+                const riskPercent = (probability * 100).toFixed(1);
+
+                // Update Risk Elements
+                document.getElementById('risk-pct').innerText = `${riskPercent}%`;
+
+                
+                const riskLabel = document.getElementById('risk-label');
+                const recommendation = document.getElementById('risk-recommendation');
+                const glowBadge = document.getElementById('risk-badge-glow');
+
+                if (probability < 0.10) {
+                    riskLabel.innerText = "0";
+                    riskLabel.className = "text-xs font-bold text-emerald-400";
+                    recommendation.innerText = "Approve loan with Standard Terms";
+                    recommendation.className = "text-sm font-bold text-emerald-400";
+                    glowBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-400 shadow-md shadow-emerald-500/10";
+                } else if (probability <= 0.21) {
+                    riskLabel.innerText = "0";
+                    riskLabel.className = "text-xs font-bold text-amber-400";
+                    recommendation.innerText = "Conditional Approval: Higher rate or co-signer recommended";
+                    recommendation.className = "text-sm font-bold text-amber-400";
+                    glowBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center bg-amber-500/10 text-amber-400 shadow-md shadow-amber-500/10";
+                } else {
+                    riskLabel.innerText = "1";
+                    riskLabel.className = "text-xs font-bold text-rose-400";
+                    recommendation.innerText = "Decline: Profit optimization dictates rejecting loans > 0.21 probability";
+                    recommendation.className = "text-sm font-bold text-rose-400";
+                    glowBadge.className = "h-12 w-12 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-400 shadow-md shadow-rose-500/10";
+                }
+            };
+
+            // Event Listeners for inputs
+            ['fico', 'rate', 'dti', 'amount', 'income', 'term', 'home'].forEach(id => {
+                document.getElementById(`input-${id}`).addEventListener('input', updateSimulator);
+            });
+
+            // Initial simulator calculation
+            updateSimulator();
+        });
+    </script>
+
+</body>
+</html>
