@@ -9,5 +9,6 @@ __pycache__/
 venv/
 env/
 .env
-results/.agents/
+results/
+.agents/
 models/*.pkl
